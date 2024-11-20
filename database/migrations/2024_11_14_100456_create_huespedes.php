@@ -16,8 +16,11 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('apellido');
             $table->string('dniPasaporte')->unique();
-            $table->date('fechaCheckIn');
-            $table->date('fechaCheckOut');
+            $table->date('fechaCheckIn')->nullable();
+            $table->date('fechaCheckOut')->nullable();
+
+            $table->foreignId('habitacion_id')->nullable()->constrained('habitaciones')->onDelete('cascade'); 
+
             $table->timestamps();
         });
     }

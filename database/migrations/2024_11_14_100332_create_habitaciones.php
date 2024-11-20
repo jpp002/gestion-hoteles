@@ -16,9 +16,10 @@ return new class extends Migration
             $table->string('numero');
             $table->string('tipo');
             $table->float('precioNoche', 8, 3);
-            $table->timestamps();
 
             $table->foreignId('hotel_id')->constrained('hoteles')->onDelete('cascade');
+
+            $table->timestamps();
         });
     }
 

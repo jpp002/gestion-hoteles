@@ -24,11 +24,11 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre' => 'required|min:5|max:500', 
-            'direccion' => 'required|min:5|max:500',
-            'telefono' => 'required|min:3',
-            'email' => 'required|min:5',
-            'sitioWeb' => 'required|min:7',
+            'nombre' => 'required|min:5|max:50', 
+            'direccion' => 'required|min:5|max:100|unique:hoteles',
+            'telefono' => 'required|max:20|unique:hoteles',
+            'email' => 'required|min:5|unique:hoteles',
+            'sitioWeb' => 'required|min:5|unique:hoteles',
         ];
     }
 
