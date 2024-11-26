@@ -23,20 +23,20 @@ class PutRequest extends FormRequest
      */
     public function rules(): array
     {
-        
+
         $huespedId = $this->route('huesped');
 
         return [
-            'nombre' => 'required|max:50', 
+            'nombre' => 'required|max:50',
             'apellido' => 'required|max:50',
-            'dniPasaporte' => 'required|min:9|max:9|unique:huepedes,dniPasaporte' . $huespedId,
+            'dniPasaporte' => 'required|min:9|max:9|unique:huespedes,dniPasaporte' . $huespedId,
 
         ];
     }
 
     public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
-        if($this->expectsJson()) {
+        if ($this->expectsJson()) {
             $response = new Response($validator->errors(), 400);
             throw new ValidationException($validator, $response);
         }

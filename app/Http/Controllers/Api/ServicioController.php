@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\ServicioNotFoundException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Servicio\PutRequest;
 use App\Http\Requests\Servicio\StoreRequest;
@@ -21,28 +22,74 @@ class ServicioController extends Controller
     /**
      * @OA\Get(
      *     path="/api/servicio",
-     *     summary="Obtener lista de servicios paginada",
+     *     summary="Obtener lista de servicios paginada con filtros dinámicos",
      *     tags={"Servicio"},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Lista de servicios paginada"
-     *     )
+     *     @OA\Parameter(
+     *         name="nombre",
+     *         in="query",
+     *         description="Nombre del servicio para filtrar",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="descripcion",
+     *         in="query",
+     *         description="Descripción del servicio para filtrar",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="categoria",
+     *         in="query",
+     *         description="Categoría del servicio para filtrar",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Cantidad de elementos por página",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Número de página",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Lista de servicios filtrada y paginada")
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Servicio::paginate(10));
+        $query = Servicio::query();
+
+        // Filtros dinámicos
+        $filterableAttributes = ['nombre', 'descripcion', 'categoria'];
+        foreach ($request->all() as $key => $value) {
+            if (in_array($key, $filterableAttributes) && !empty($value)) {
+                $query->where($key, 'like', '%' . $value . '%');
+            }
+        }
+
+        // Paginación personalizada
+        $perPage = $request->query('per_page', 10); // Por defecto 10 elementos por página
+        $servicios = $query->paginate($perPage);
+
+        if ($servicios->isEmpty()) {
+            return response()->json([
+                'mensaje' => 'No se han encontrado servicios con los filtros seleccionados.',
+                'codigo' => 200,
+            ], 200);
+        }
+
+        return response()->json($servicios);
     }
+
 
     /**
      * @OA\Get(
      *     path="/api/servicio/all",
      *     summary="Obtener todos los servicios",
      *     tags={"Servicio"},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Lista completa de servicios"
-     *     )
+     *     @OA\Response(response=200, description="Lista completa de servicios")
      * )
      */
     public function all()
@@ -54,29 +101,23 @@ class ServicioController extends Controller
      * @OA\Post(
      *     path="/api/servicio",
      *     summary="Crear un nuevo servicio",
-     *     description="Crea un nuevo servicio con los datos proporcionados",
      *     tags={"Servicio"},
      *     @OA\RequestBody(
      *         required=true,
-     *         description="Datos necesarios para crear un servicio",
      *         @OA\JsonContent(ref="#/components/schemas/StoreServicioRequest")
      *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Servicio creado correctamente",
-     *         @OA\JsonContent(ref="#/components/schemas/Servicio")
-     *     )
+     *     @OA\Response(response=201, description="Servicio creado correctamente"),
+     *     @OA\Response(response=422, description="Errores de validación")
      * )
      */
     public function store(StoreRequest $request)
     {
         $data = $request->validated();
 
-        // Crear el hotel manualmente
         $servicio = new Servicio($data);
-        $servicio->timestamps = false; // Evita la actualización automática de timestamps
-        $servicio->created_at = now(); // Establece created_at manualmente
-        $servicio->updated_at = null; // No queremos modificar updated_at en creación
+        $servicio->timestamps = false;
+        $servicio->created_at = now();
+        $servicio->updated_at = null;
         $servicio->save();
 
         return response()->json($servicio, 201);
@@ -85,22 +126,12 @@ class ServicioController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/servicio/{servicio}",
-     *     summary="Obtener un servicio",
-     *     description="Devuelve los detalles de un servicio específico.",
+     *     path="/api/servicio/{id}",
+     *     summary="Obtener un servicio por ID",
      *     tags={"Servicio"},
-     *     @OA\Parameter(
-     *         name="servicio",
-     *         in="path",
-     *         required=true,
-     *         description="ID del servicio",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Detalles del servicio",
-     *         @OA\JsonContent(ref="#/components/schemas/Servicio")
-     *     )
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID del servicio", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Detalles del servicio"),
+     *     @OA\Response(response=404, description="Servicio no encontrado")
      * )
      */
     public function show($idServicio)
@@ -108,36 +139,24 @@ class ServicioController extends Controller
         $servicio = Servicio::find($idServicio);
 
         if (!$servicio) {
-            return response()->json([
-                'message' => "La habitación con ID {$idServicio} no existe.",
-            ], 404);
+            throw new ServicioNotFoundException($idServicio);
         }
-        
+
         return response()->json($servicio);
     }
 
     /**
      * @OA\Put(
-     *     path="/api/servicio/{servicio}",
-     *     summary="Actualizar datos de un servicio",
-     *     description="Actualiza los datos de un servicio específico.",
+     *     path="/api/servicio/{id}",
+     *     summary="Actualizar un servicio",
      *     tags={"Servicio"},
-     *     @OA\Parameter(
-     *         name="servicio",
-     *         in="path",
-     *         required=true,
-     *         description="ID del servicio",
-     *         @OA\Schema(type="integer")
-     *     ),
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID del servicio", @OA\Schema(type="integer")),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/PutServicioRequest")
      *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Servicio actualizado",
-     *         @OA\JsonContent(ref="#/components/schemas/Servicio")
-     *     )
+     *     @OA\Response(response=200, description="Servicio actualizado correctamente"),
+     *     @OA\Response(response=404, description="Servicio no encontrado")
      * )
      */
     public function update(PutRequest $request, $idServicio)
@@ -145,36 +164,21 @@ class ServicioController extends Controller
         $servicio = Servicio::find($idServicio);
 
         if (!$servicio) {
-            return response()->json([
-                'message' => "La habitación con ID {$idServicio} no existe.",
-            ], 404);
+            throw new ServicioNotFoundException($idServicio);
         }
-        $servicio->updated_at = now();
+        $servicio->touch();
         $servicio->update($request->validated());
         return response()->json($servicio);
     }
 
     /**
      * @OA\Delete(
-     *     path="/api/servicio/{servicio}",
+     *     path="/api/servicio/{id}",
      *     summary="Eliminar un servicio",
-     *     description="Elimina un servicio específico por ID.",
      *     tags={"Servicio"},
-     *     @OA\Parameter(
-     *         name="servicio",
-     *         in="path",
-     *         required=true,
-     *         description="ID del servicio",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Servicio eliminado",
-     *         @OA\JsonContent(
-     *             type="string",
-     *             example="ok"
-     *         )
-     *     )
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID del servicio", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Servicio eliminado"),
+     *     @OA\Response(response=404, description="Servicio no encontrado")
      * )
      */
     public function destroy($idServicio)
@@ -182,9 +186,7 @@ class ServicioController extends Controller
         $servicio = Servicio::find($idServicio);
 
         if (!$servicio) {
-            return response()->json([
-                'message' => "La habitación con ID {$idServicio} no existe.",
-            ], 404);
+            throw new ServicioNotFoundException($idServicio);
         }
 
         $servicio->delete();
@@ -193,53 +195,27 @@ class ServicioController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/servicio/{servicio}/hoteles",
-     *     summary="Obtener los hoteles asociados a un servicio",
-     *     description="Devuelve la lista de hoteles asociados a un servicio específico.",
+     *     path="/api/servicio/{id}/hoteles",
+     *     summary="Obtener hoteles asociados a un servicio",
      *     tags={"Servicio"},
-     *     @OA\Parameter(
-     *         name="servicio",
-     *         in="path",
-     *         required=true,
-     *         description="ID del servicio",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Lista de hoteles asociados al servicio",
-     *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(
-     *                 type="object",
-     *                 ref="#/components/schemas/Hotel"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Servicio no encontrado",
-     *         @OA\JsonContent(
-     *             type="string",
-     *             example="Servicio no encontrado"
-     *         )
-     *     )
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID del servicio", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Lista de hoteles asociados"),
+     *     @OA\Response(response=404, description="Servicio no encontrado")
      * )
      */
-    public function hoteles($idServicio) {
+    public function hoteles($idServicio)
+    {
         $servicio = Servicio::find($idServicio);
 
         if (!$servicio) {
-            return response()->json([
-                'message' => "La habitación con ID {$idServicio} no existe.",
-            ], 404);
+            throw new ServicioNotFoundException($idServicio);
         }
 
         $hoteles = $servicio->hoteles;
-        if($hoteles->isEmpty()){
+        if ($hoteles->isEmpty()) {
             return response()->json(["message" => "Este servicio no esta asociado a ningun hotel"], 404);
         }
 
         return response()->json($hoteles);
     }
-
 }

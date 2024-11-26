@@ -9,18 +9,20 @@ class Hotel extends Model
 {
     use HasFactory;
 
-    
+
     protected $table = 'hoteles';
 
     protected $fillable = ['nombre', 'direccion', 'telefono', 'email', 'sitioWeb'];
 
     //Relaciones
-    public function habitaciones() { 
+    public function habitaciones()
+    {
         return $this->hasMany(Habitacion::class);
     }
 
     // Muchos a Muchos
-    public function servicios(){
+    public function servicios()
+    {
         return $this->belongsToMany(Servicio::class);
     }
 }

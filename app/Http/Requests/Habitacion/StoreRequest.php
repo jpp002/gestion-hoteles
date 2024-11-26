@@ -24,7 +24,7 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero' => 'required|max:10', 
+            'numero' => 'required|max:10',
             'tipo' => 'required|min:5|max:20',
             'precioNoche' => 'required|numeric',
             'hotel_id' => 'required|integer',
@@ -33,7 +33,7 @@ class StoreRequest extends FormRequest
 
     public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
-        if($this->expectsJson()) {
+        if ($this->expectsJson()) {
             $response = new Response($validator->errors(), 400);
             throw new ValidationException($validator, $response);
         }

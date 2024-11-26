@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\HotelNotFoundException;
+use App\Exceptions\ServicioNotFoundException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Hotel\PutRequest;
 use App\Http\Requests\Hotel\StoreRequest;
@@ -20,31 +22,91 @@ use Illuminate\Http\Request;
 
 class HotelController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/hotel",
-     *     summary="Obtener lista de hoteles paginada",
-     *     tags={"Hotel"},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Lista de hoteles"
-     *     )
-     * )
-     */
-    public function index()
-    {
-        return response()->json(Hotel::paginate(10));
+     /**
+ * @OA\Get(
+ *     path="/api/hotel",
+ *     summary="Obtener lista de hoteles paginada con filtros dinámicos",
+ *     tags={"Hotel"},
+ *     @OA\Parameter(
+ *         name="nombre",
+ *         in="query",
+ *         description="Nombre del hotel para filtrar",
+ *         @OA\Schema(type="string")
+ *     ),
+ *     @OA\Parameter(
+ *         name="direccion",
+ *         in="query",
+ *         description="Dirección del hotel para filtrar",
+ *         @OA\Schema(type="string")
+ *     ),
+ *     @OA\Parameter(
+ *         name="telefono",
+ *         in="query",
+ *         description="Teléfono del hotel para filtrar",
+ *         @OA\Schema(type="string")
+ *     ),
+ *     @OA\Parameter(
+ *         name="email",
+ *         in="query",
+ *         description="Email del hotel para filtrar",
+ *         @OA\Schema(type="string")
+ *     ),
+ *     @OA\Parameter(
+ *         name="sitioWeb",
+ *         in="query",
+ *         description="Sitio web del hotel para filtrar",
+ *         @OA\Schema(type="string")
+ *     ),
+ *     @OA\Parameter(
+ *         name="per_page",
+ *         in="query",
+ *         description="Cantidad de elementos por página",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         description="Número de página",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(response=200, description="Lista de hoteles filtrada y paginada")
+ * )
+ */
+
+    public function index(Request $request)
+{
+    $query = Hotel::query();
+
+    // Aplicar filtros dinámicos basados en los parámetros de consulta
+    $filterableAttributes = ['nombre', 'direccion', 'telefono', 'email', 'sitioWeb'];
+    foreach ($request->all() as $key => $value) {
+        if (in_array($key, $filterableAttributes) && !empty($value)) {
+            $query->where($key, 'like', '%' . $value . '%');
+        }
     }
+
+    // Manejo de paginación personalizada
+    $perPage = $request->query('per_page', 10); // Por defecto 10 elementos por página
+    $hoteles = $query->paginate($perPage);
+
+    if ($hoteles->isEmpty()) {
+        return response()->json([
+            'mensaje' => 'No se han encontrado hoteles con los filtros seleccionados.',
+            'codigo' => 200,
+        ], 200);
+    }
+
+    return response()->json($hoteles);
+}
+
+
 
     /**
      * @OA\Get(
      *     path="/api/hotel/all",
      *     summary="Obtener todos los hoteles",
      *     tags={"Hotel"},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Lista de todas los hoteles"
-     *     )
+     *     @OA\Response(response=200, description="Lista de todos los hoteles")
      * )
      */
     public function all()
@@ -56,30 +118,9 @@ class HotelController extends Controller
      * @OA\Post(
      *     path="/api/hotel",
      *     summary="Crear un nuevo hotel",
-     *     description="Crea un nuevo hotel con los datos proporcionados",
      *     tags={"Hotel"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         description="Datos necesarios para crear un hotel",
-     *         @OA\JsonContent(ref="#/components/schemas/StoreHotelRequest")
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Hotel creado correctamente",
-     *         @OA\JsonContent(ref="#/components/schemas/Hotel")
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Errores de validación",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 additionalProperties=@OA\Property(type="array", @OA\Items(type="string"))
-     *             )
-     *         )
-     *     )
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/StoreHotelRequest")),
+     *     @OA\Response(response=201, description="Hotel creado correctamente")
      * )
      */
     public function store(StoreRequest $request)
@@ -92,7 +133,7 @@ class HotelController extends Controller
         $hotel->created_at = now(); // Establece created_at manualmente
         $hotel->updated_at = null; // No queremos modificar updated_at en creación
         $hotel->save();
-
+        
         return response()->json($hotel, 201);
     }
 
@@ -100,31 +141,23 @@ class HotelController extends Controller
     /**
      * @OA\Get(
      *     path="/api/hotel/{hotel}",
-     *     summary="Obtener hotel",
-     *     description="Devuelve los detalles de un hotel específico.",
+     *     summary="Obtener detalles de un hotel",
      *     tags={"Hotel"},
-     *     @OA\Parameter(
-     *         name="hotel",
-     *         in="path",
-     *         required=true,
-     *         description="ID del hotel",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Detalles del hotel",
-     *         @OA\JsonContent(ref="#/components/schemas/Hotel")
-     *     )
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Detalles del hotel"),
+     *     @OA\Response(response=404, description="Hotel no encontrado")
      * )
      */
     public function show($idHotel)
     {
+        
         $hotel = Hotel::find($idHotel);
 
         if (!$hotel) {
-            return response()->json([
-                'message' => "El hotel con ID {$idHotel} no existe.",
-            ], 404);
+            throw new HotelNotFoundException($idHotel);
+            // return response()->json([
+            //     'message' => "El hotel con ID {$idHotel} no existe.",
+            // ], 404);
         }
 
         return response()->json($hotel, 200);
@@ -134,34 +167,19 @@ class HotelController extends Controller
     /**
      * @OA\Put(
      *     path="/api/hotel/{hotel}",
-     *     summary="Editar hotel",
-     *     description="Actualiza los datos de un hotel específico.",
+     *     summary="Actualizar un hotel",
      *     tags={"Hotel"},
-     *     @OA\Parameter(
-     *         name="hotel",
-     *         in="path",
-     *         required=true,
-     *         description="ID del hotel",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/PutHotelRequest")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Hotel actualizado",
-     *         @OA\JsonContent(ref="#/components/schemas/Hotel")
-     *     )
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/PutHotelRequest")),
+     *     @OA\Response(response=200, description="Hotel actualizado correctamente"),
+     *     @OA\Response(response=404, description="Hotel no encontrado")
      * )
      */
     public function update(PutRequest $request,  $idHotel)
     {
         $hotel = Hotel::find($idHotel);
         if (!$hotel) {
-            return response()->json([
-                'message' => "El hotel con ID {$idHotel} no existe.",
-            ], 404);
+            throw new HotelNotFoundException($idHotel);
         }
 
         $hotel->touch();
@@ -173,32 +191,17 @@ class HotelController extends Controller
      * @OA\Delete(
      *     path="/api/hotel/{hotel}",
      *     summary="Eliminar un hotel",
-     *     description="Elimina un hotel específico por ID.",
      *     tags={"Hotel"},
-     *     @OA\Parameter(
-     *         name="hotel",
-     *         in="path",
-     *         required=true,
-     *         description="ID del hotel",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Hotel eliminado",
-     *         @OA\JsonContent(
-     *             type="string",
-     *             example="ok"
-     *         )
-     *     )
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Hotel eliminado correctamente"),
+     *     @OA\Response(response=404, description="Hotel no encontrado")
      * )
      */
     public function destroy($idHotel)
     {
         $hotel = Hotel::find($idHotel);
         if (!$hotel) {
-            return response()->json([
-                'message' => "El hotel con ID {$idHotel} no existe.",
-            ], 404);
+            throw new HotelNotFoundException($idHotel);
         }
 
         try {
@@ -213,32 +216,19 @@ class HotelController extends Controller
     /**
      * @OA\Get(
      *     path="/api/hotel/{hotel}/habitaciones",
-     *     summary="Obtener habitaciones de un hotel",
-     *     description="Obtiene todas las habitaciones de un hotel.",
+     *     summary="Obtener las habitaciones de un hotel",
      *     tags={"Hotel"},
-     *     @OA\Parameter(
-     *         name="hotel",
-     *         in="path",
-     *         required=true,
-     *         description="ID del hotel",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Lista de habitaciones del hotel",
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Habitacion"))
-     *     )
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Lista de habitaciones")
      * )
      */
-    public function habitaciones($idHotel) 
+    public function habitaciones($idHotel)
     {
         $hotel = Hotel::find($idHotel);
         if (!$hotel) {
-            return response()->json([
-                'message' => "El hotel con ID {$idHotel} no existe.",
-            ], 404);
+            throw new HotelNotFoundException($idHotel);
         }
-        
+
         $habitaciones = $hotel->habitaciones;
 
         if ($habitaciones->isEmpty()) {
@@ -248,76 +238,38 @@ class HotelController extends Controller
         return response()->json($habitaciones, 200);
     }
 
-        /**
+    /**
      * @OA\Post(
      *     path="/api/hotel/{hotel}/servicio/{servicio}",
      *     summary="Asociar un servicio a un hotel",
      *     tags={"Hotel"},
-     *     @OA\Parameter(
-     *         name="hotel",
-     *         in="path",
-     *         required=true,
-     *         description="ID del hotel al que se asociará el servicio",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="servicio",
-     *         in="path",
-     *         required=true,
-     *         description="ID del servicio a asociar",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Servicio asociado correctamente",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="Servicio asociado correctamente"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="El servicio ya está asociado a este hotel",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="El servicio ya está asociado a este hotel"
-     *             )
-     *         )
-     *     )
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="servicio", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Servicio asociado correctamente"),
+     *     @OA\Response(response=400, description="Error en la asociación")
      * )
      */
     public function addServicio($idHotel, $idServicio)
     {
         $hotel = Hotel::find($idHotel);
         if (!$hotel) {
-            return response()->json([
-                'message' => "El hotel con ID {$idHotel} no existe.",
-            ], 404);
+            throw new HotelNotFoundException($idHotel);
         }
 
         $servicio = servicio::find($idServicio);
         if (!$servicio) {
-            return response()->json([
-                'message' => "El Servicio con ID {$idServicio} no existe.",
-            ], 404);
+            throw new ServicioNotFoundException($idServicio);
         }
 
         if ($hotel->servicios->contains($servicio->id)) {
             return response()->json(['message' => 'El servicio ya está asociado a este hotel'], 400);
         }
-    
+
         $hotel->servicios()->attach($servicio->id);
-    
+
         return response()->json(['message' => 'Servicio asociado correctamente'], 200);
     }
-     
+
 
 
     /**
@@ -325,60 +277,22 @@ class HotelController extends Controller
      *     path="/api/hotel/{hotel}/servicio/{servicio}",
      *     summary="Desasociar un servicio de un hotel",
      *     tags={"Hotel"},
-     *     @OA\Parameter(
-     *         name="hotel",
-     *         in="path",
-     *         required=true,
-     *         description="ID del hotel del que se desasociará el servicio",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="servicio",
-     *         in="path",
-     *         required=true,
-     *         description="ID del servicio a desasociar",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Servicio desasociado correctamente",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="Servicio desasociado correctamente"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="El servicio no está asociado a este hotel",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="El servicio no está asociado a este hotel"
-     *             )
-     *         )
-     *     )
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="servicio", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Servicio desasociado correctamente"),
+     *     @OA\Response(response=400, description="Error en la desasociación")
      * )
      */
     public function removeServicio($idHotel, $idServicio)
     {
         $hotel = Hotel::find($idHotel);
         if (!$hotel) {
-            return response()->json([
-                'message' => "El hotel con ID {$idHotel} no existe.",
-            ], 404);
+            throw new HotelNotFoundException($idHotel);
         }
 
         $servicio = servicio::find($idServicio);
         if (!$servicio) {
-            return response()->json([
-                'message' => "El Servicio con ID {$idServicio} no existe.",
-            ], 404);
+            throw new ServicioNotFoundException($idServicio);
         }
 
 
@@ -394,38 +308,24 @@ class HotelController extends Controller
     /**
      * @OA\Get(
      *     path="/api/hotel/{hotel}/servicios",
-     *     summary="Obtener servicios de un hotel",
-     *     description="Obtiene todos los servicios asociados a un hotel.",
+     *     summary="Obtener los servicios de un hotel",
      *     tags={"Hotel"},
-     *     @OA\Parameter(
-     *         name="hotel",
-     *         in="path",
-     *         required=true,
-     *         description="ID del hotel",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Lista de servicios del hotel",
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Servicio"))
-     *     )
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Lista de servicios")
      * )
      */
     public function servicios($idHotel)
     {
         $hotel = Hotel::find($idHotel);
         if (!$hotel) {
-            return response()->json([
-                'message' => "El hotel con ID {$idHotel} no existe.",
-            ], 404);
+            throw new HotelNotFoundException($idHotel);
         }
 
         $servicios = $hotel->servicios;
 
-        if($servicios->isEmpty()){
+        if ($servicios->isEmpty()) {
             return response()->json(["message" => "Este hotel no tiene servicios"], 404);
         }
         return response()->json($servicios, 200);
     }
-
 }

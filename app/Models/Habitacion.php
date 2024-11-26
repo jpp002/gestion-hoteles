@@ -14,15 +14,18 @@ class Habitacion extends Model
     protected $fillable = ['numero', 'tipo', 'precioNoche', 'hotel_id'];
 
     //Relaciones
-    public function hotel() {
+    public function hotel()
+    {
         return $this->belongsTo(Hotel::class);
     }
-    
-    public function huespedes() {
+
+    public function huespedes()
+    {
         return $this->hasMany(Huesped::class);
     }
 
-    public function isDisponible() {
+    public function isDisponible()
+    {
         // Define la capacidad máxima según el tipo de habitación
         $capacidades = [
             'simple' => 1,
@@ -37,5 +40,4 @@ class Habitacion extends Model
 
         return $huespedesActuales < $capacidadMaxima;
     }
-
 }

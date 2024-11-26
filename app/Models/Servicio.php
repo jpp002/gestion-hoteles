@@ -14,7 +14,8 @@ class Servicio extends Model
     protected $fillable = ['nombre', 'descripcion', 'categoria'];
 
     // Muchos a Muchos
-    public function hoteles(){
+    public function hoteles()
+    {
         return $this->belongsToMany(Hotel::class);
     }
 }

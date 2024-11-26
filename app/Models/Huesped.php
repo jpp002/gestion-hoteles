@@ -14,8 +14,8 @@ class Huesped extends Model
     protected $fillable = ['nombre', 'apellido', 'dniPasaporte', 'fechaCheckin', 'fechaCheckout', 'habitacion_id'];
 
     //Relacion
-    public function habitacion() {
+    public function habitacion()
+    {
         return $this->belongsTo(Habitacion::class);
     }
-
 }
