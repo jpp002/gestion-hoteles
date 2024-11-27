@@ -20,6 +20,10 @@ return new class extends Migration
             $table->date('fechaCheckOut')->nullable();
 
             $table->foreignId('habitacion_id')->nullable()->constrained('habitaciones')->onDelete('cascade'); 
+            // $table->date('fechaCheckIn');
+            // $table->date('fechaCheckOut');
+
+            // $table->foreignId('habitacion_id')->constrained('habitaciones')->onDelete('cascade'); 
 
             $table->timestamps();
         });

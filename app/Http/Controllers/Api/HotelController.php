@@ -92,8 +92,8 @@ class HotelController extends Controller
     if ($hoteles->isEmpty()) {
         return response()->json([
             'mensaje' => 'No se han encontrado hoteles con los filtros seleccionados.',
-            'codigo' => 200,
-        ], 200);
+            'codigo' => 404,
+        ], 404);
     }
 
     return response()->json($hoteles);

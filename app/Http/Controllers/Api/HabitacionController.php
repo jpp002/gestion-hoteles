@@ -79,8 +79,8 @@ class HabitacionController extends Controller
         if ($habitaciones->isEmpty()) {
             return response()->json([
                 'mensaje' => 'No se han encontrado habitaciones con los filtros seleccionados.',
-                'codigo' => 200,
-            ], 200);
+                'codigo' => 404,
+            ], 404);
         }
 
         return response()->json($habitaciones);

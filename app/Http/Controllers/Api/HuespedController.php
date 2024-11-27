@@ -92,8 +92,8 @@ public function index(Request $request)
     if ($huespedes->isEmpty()) {
         return response()->json([
             'mensaje' => 'No se han encontrado huespedes con los filtros seleccionados.',
-            'codigo' => 200,
-        ], 200);
+            'codigo' => 404,
+        ], 404);
     }
 
     return response()->json($huespedes);

@@ -76,8 +76,8 @@ class ServicioController extends Controller
         if ($servicios->isEmpty()) {
             return response()->json([
                 'mensaje' => 'No se han encontrado servicios con los filtros seleccionados.',
-                'codigo' => 200,
-            ], 200);
+                'codigo' => 404,
+            ], 404);
         }
 
         return response()->json($servicios);

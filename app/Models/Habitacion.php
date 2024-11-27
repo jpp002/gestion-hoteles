@@ -28,8 +28,15 @@ class Habitacion extends Model
     {
         // Define la capacidad máxima según el tipo de habitación
         $capacidades = [
-            'simple' => 1,
-            'doble' => 2,
+            'simple' => 1,          // Habitación para una persona
+            'doble' => 2,           // Habitación para dos personas
+            'suite' => 4,           // Habitación premium, hasta 4 personas
+            'familiar' => 6,        // Habitación para familias
+            'deluxe' => 2,          // Habitación doble con comodidades adicionales
+            'economica' => 1,       // Habitación sencilla con precio reducido
+            'presidencial' => 6,    // Habitación de lujo con capacidad máxima
+            'triple' => 3,          // Habitación con tres camas individuales
+            'compartida' => 8,      // Habitación tipo hostal, con camas múltiples
         ];
 
         $capacidadMaxima = $capacidades[$this->tipo] ?? 1;
