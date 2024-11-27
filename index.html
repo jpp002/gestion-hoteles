@@ -43,8 +43,9 @@
       window["SwaggerUIStandalonePreset"] = window["swagger-ui-standalone-preset"];
       // Build the Swagger UI
       const ui = SwaggerUIBundle({
-        url: "./docs/swagger.json",  // Ensure the path to the Swagger JSON file is correct
+        url: "https://jpp002.github.io/gestion-hoteles/swagger.json",  // Ensure the path to the Swagger JSON file is correct
         dom_id: '#swagger-ui',
+        deepLinking: true,
         presets: [
           SwaggerUIBundle.presets.apis,
           SwaggerUIStandalonePreset
