@@ -43,6 +43,7 @@ Route::get('hotel/{hotel}/habitaciones', [HotelController::class, 'habitaciones'
 Route::get('hotel/{hotel}/servicios', [HotelController::class, 'servicios']);
 Route::get('servicio/{servicio}/hoteles', [ServicioController::class, 'hoteles']);
 Route::get('habitacion/{habitacion}/hotel', [HabitacionController::class, 'hotel']);
+Route::get('habitacion/{habitacion}/huespedes', [HabitacionController::class, 'huespedes']);
 Route::post('hotel/{hotel}/servicio/{servicio}', [HotelController::class, 'addServicio']);
 Route::post('huesped/{huesped}/reservar/{habitacion}', [HuespedController::class, 'reservarHabitacion']);
 Route::post('/huesped/{huesped}/checkout', [HuespedController::class, 'checkoutHabitacion']);

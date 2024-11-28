@@ -285,6 +285,10 @@ public function index(Request $request)
         $huesped->fechaCheckout = now();
         $huesped->save();
 
+        if (!$huesped->habitacion){
+            return response()->json(['message' => "El huesped $huesped->nombre no tiene reservada ninguna habitación."], 200);
+        }
+
         $huesped->habitacion()->dissociate();
         $huesped->save();
 
