@@ -27,7 +27,7 @@ class StoreRequest extends FormRequest
             'nombre' => 'required|max:50',
             'apellido' => 'required|max:50',
             'dniPasaporte' => 'required|min:9|max:9|unique:huespedes',
-            'idHotel' => 'required|integer',
+            //'idHotel' => 'required|integer',
             // 'fechaCheckout' => 'required|date',
             // 'fechaCheckout' => 'requiered|date',
         ];

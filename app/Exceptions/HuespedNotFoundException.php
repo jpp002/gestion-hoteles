@@ -12,7 +12,7 @@ class HuespedNotFoundException extends Exception
     {
         $this->huespedId = $huespedId;
         $message = $huespedId 
-            ? "El huesped con ID {$huespedId} no existee." 
+            ? "El huesped con ID {$huespedId} no existe." 
             : "El huesped no existe.";
         parent::__construct($message);
     }

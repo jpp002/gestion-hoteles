@@ -258,7 +258,7 @@ public function index(Request $request)
         }
 
         $huesped->habitacion()->associate($habitacion)->save();
-        // Registrar la fecha de check-out
+        
         $huesped->fechaCheckin = now();  
         $huesped->save();
         return response()->json($huesped, 201);

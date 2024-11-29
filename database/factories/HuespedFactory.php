@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Huesped;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class HuespedFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Huesped::class;
+
     public function definition(): array
     {
         return [
-            //
+            'nombre' => $this->faker->name,
+            'apellido'=> $this->faker->lastName,
+            'dniPasaporte' => $this->faker->regexify('[0-9]{8}[A-Z]')
         ];
     }
 }

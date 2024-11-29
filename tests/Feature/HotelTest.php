@@ -123,49 +123,49 @@ class HotelTest extends TestCase
         $this->assertDatabaseMissing('hoteles', ['id' => $hotel->id]);
     }
 
-    // /**
-    //  * Test para asociar un servicio a un hotel.
-    //  */
-    // public function test_puede_asociar_servicio_a_hotel(): void
-    // {
-    //     $hotel = Hotel::factory()->create();
-    //     $servicio = Servicio::factory()->create();
+    /**
+     * Test para asociar un servicio a un hotel.
+     */
+    public function test_puede_asociar_servicio_a_hotel(): void
+    {
+        $hotel = Hotel::factory()->create();
+        $servicio = Servicio::factory()->create();
 
-    //     $response = $this->postJson("/api/hotel/{$hotel->id}/servicio/{$servicio->id}");
+        $response = $this->postJson("/api/hotel/{$hotel->id}/servicio/{$servicio->id}");
 
-    //     $response->assertStatus(200)
-    //              ->assertJsonFragment(['message' => 'Servicio asociado correctamente']);
-    //     $this->assertTrue($hotel->servicios->contains($servicio));
-    // }
+        $response->assertStatus(200)
+                 ->assertJsonFragment(['message' => 'Servicio asociado correctamente']);
+        $this->assertTrue($hotel->servicios->contains($servicio));
+    }
 
-    // /**
-    //  * Test para listar habitaciones de un hotel.
-    //  */
-    // public function test_puede_listar_habitaciones_de_un_hotel(): void
-    // {
-    //     $hotel = Hotel::factory()->create();
-    //     $habitacion = $hotel->habitaciones()->create([
-    //         'numero' => '101',
-    //         'tipo' => 'Doble',
-    //         'precioNoche' => 120.50,
-    //     ]);
+    /**
+     * Test para listar habitaciones de un hotel.
+     */
+    public function test_puede_listar_habitaciones_de_un_hotel(): void
+    {
+        $hotel = Hotel::factory()->create();
+        $habitacion = $hotel->habitaciones()->create([
+            'numero' => '101',
+            'tipo' => 'Doble',
+            'precioNoche' => 120.50,
+        ]);
 
-    //     $response = $this->getJson("/api/hotel/{$hotel->id}/habitaciones");
+        $response = $this->getJson("/api/hotel/{$hotel->id}/habitaciones");
 
-    //     $response->assertStatus(200)
-    //              ->assertJsonFragment(['numero' => $habitacion->numero]);
-    // }
+        $response->assertStatus(200)
+                 ->assertJsonFragment(['numero' => $habitacion->numero]);
+    }
 
-    // /**
-    //  * Test para manejar error al listar habitaciones de un hotel sin habitaciones.
-    //  */
-    // public function test_error_si_hotel_no_tiene_habitaciones(): void
-    // {
-    //     $hotel = Hotel::factory()->create();
+    /**
+     * Test para manejar error al listar habitaciones de un hotel sin habitaciones.
+     */
+    public function test_error_si_hotel_no_tiene_habitaciones(): void
+    {
+        $hotel = Hotel::factory()->create();
 
-    //     $response = $this->getJson("/api/hotel/{$hotel->id}/habitaciones");
+        $response = $this->getJson("/api/hotel/{$hotel->id}/habitaciones");
 
-    //     $response->assertStatus(404)
-    //              ->assertJsonFragment(['message' => 'Este hotel no tiene habitaciones']);
-    // }
+        $response->assertStatus(404)
+                 ->assertJsonFragment(['message' => 'Este hotel no tiene habitaciones']);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Servicio;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ServicioFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Servicio::class;
+
     public function definition(): array
     {
         return [
-            //
+            'nombre' => $this->faker->word, 
+            'descripcion' => $this->faker->sentence, 
+            'categoria' => $this->faker->randomElement(['Relax', 'Deportes', 'Entretenimiento', 'Servicios Básicos', 'Gastronomía']), 
         ];
     }
 }
