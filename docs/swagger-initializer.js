@@ -13,7 +13,12 @@ window.onload = function() {
     plugins: [
       SwaggerUIBundle.plugins.DownloadUrl
     ],
-    layout: "StandaloneLayout"
+    layout: "StandaloneLayout",
+    requestInterceptor: (request) => {
+      // Añadir encabezado X-CSRF-TOKEN vacío
+      request.headers['X-CSRF-TOKEN'] = '';
+      return request;
+    }
   });
 
   //</editor-fold>
