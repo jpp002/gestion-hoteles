@@ -33,8 +33,10 @@
 
 <div id="swagger-ui"></div>
 
-<script src="./swagger-ui-bundle.js" charset="UTF-8"> </script>
-<script src="./swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
+<link rel="stylesheet" href="node_modules/swagger-ui-dist/swagger-ui.css">
+<script src="node_modules/swagger-ui-dist/swagger-ui-bundle.js" charset="UTF-8"></script>
+<script src="node_modules/swagger-ui-dist/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+
 <script>
   window.onload = function() {
     window["SwaggerUIBundle"] = window["swagger-ui-bundle"]

@@ -8,7 +8,10 @@
     "devDependencies": {
         "axios": "^1.6.4",
         "laravel-vite-plugin": "^1.0.0",
-        "vite": "^5.0.0",
-        "swagger-ui": "4.5.2"
+        "swagger-ui": "4.5.2",
+        "vite": "^5.0.0"
+    },
+    "dependencies": {
+        "swagger-ui-dist": "^5.18.2"
     }
 }
