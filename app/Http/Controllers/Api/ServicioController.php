@@ -69,6 +69,11 @@ class ServicioController extends Controller
             }
         }
 
+        // Verificar si se debe incluir la relación 'habitaciones'
+        if ($request->query('includeHoteles') === 'true') {
+            $query->with('hoteles');
+        }
+
         // Paginación personalizada
         $perPage = $request->query('per_page', 10); // Por defecto 10 elementos por página
         $servicios = $query->paginate($perPage);
@@ -134,15 +139,26 @@ class ServicioController extends Controller
      *     @OA\Response(response=404, description="Servicio no encontrado")
      * )
      */
-    public function show($idServicio)
+    public function show(Request $request, $idServicio)
     {
-        $servicio = Servicio::find($idServicio);
+        $includeHoteles = $request->query('includeHoteles') === 'true';
+
+        $query = Servicio::query();
+
+        if ($includeHoteles) {
+            $query->with('hoteles');
+        }
+
+
+        $servicio = $query->find($idServicio);
 
         if (!$servicio) {
             throw new ServicioNotFoundException($idServicio);
         }
+        
 
-        return response()->json($servicio);
+
+        return response()->json($servicio, 200);
     }
 
     /**

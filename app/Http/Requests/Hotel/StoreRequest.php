@@ -27,7 +27,7 @@ class StoreRequest extends FormRequest
             'nombre' => 'required|min:5|max:50',
             'direccion' => 'required|min:5|max:100|unique:hoteles',
             'telefono' => 'required|max:20|unique:hoteles',
-            'email' => 'required|min:5|unique:hoteles',
+            'email' => 'required|email|unique:hoteles',
             'sitioWeb' => 'required|min:5|unique:hoteles',
         ];
     }

@@ -73,31 +73,41 @@ class HotelController extends Controller
  * )
  */
 
-    public function index(Request $request)
-{
-    $query = Hotel::query();
+ public function index(Request $request)
+ {
+     $query = Hotel::query();
+ 
+     // Aplicar filtros dinámicos basados en los parámetros de consulta
+     $filterableAttributes = ['nombre', 'direccion', 'telefono', 'email', 'sitioWeb'];
+     foreach ($request->all() as $key => $value) {
+         if (in_array($key, $filterableAttributes) && !empty($value)) {
+             $query->where($key, 'like', '%' . $value . '%');
+         }
+     }
+ 
+     // Verificar si se debe incluir la relación 'habitaciones'
+     if ($request->query('includeHabitaciones') === 'true') {
+         $query->with('habitaciones');
+     }
 
-    // Aplicar filtros dinámicos basados en los parámetros de consulta
-    $filterableAttributes = ['nombre', 'direccion', 'telefono', 'email', 'sitioWeb'];
-    foreach ($request->all() as $key => $value) {
-        if (in_array($key, $filterableAttributes) && !empty($value)) {
-            $query->where($key, 'like', '%' . $value . '%');
-        }
+     if ($request->query('includeServicios') === 'true') {
+        $query->with('servicios');
     }
-
-    // Manejo de paginación personalizada
-    $perPage = $request->query('per_page', 10); // Por defecto 10 elementos por página
-    $hoteles = $query->paginate($perPage);
-
-    if ($hoteles->isEmpty()) {
-        return response()->json([
-            'mensaje' => 'No se han encontrado hoteles con los filtros seleccionados.',
-            'codigo' => 404,
-        ], 404);
-    }
-
-    return response()->json($hoteles);
-}
+ 
+     // Manejo de paginación personalizada
+     $perPage = $request->query('per_page', 10); // Por defecto 10 elementos por página
+     $hoteles = $query->paginate($perPage);
+ 
+     if ($hoteles->isEmpty()) {
+         return response()->json([
+             'mensaje' => 'No se han encontrado hoteles con los filtros seleccionados.',
+             'codigo' => 404,
+         ], 404);
+     }
+ 
+     return response()->json($hoteles);
+ }
+ 
 
 
 
@@ -148,20 +158,26 @@ class HotelController extends Controller
      *     @OA\Response(response=404, description="Hotel no encontrado")
      * )
      */
-    public function show($idHotel)
+    public function show(Request $request, $idHotel)
     {
-        
-        $hotel = Hotel::find($idHotel);
-
+        // Verificar si se debe incluir la relación 'habitaciones'
+        $includeHabitaciones = $request->query('includeHabitaciones') === 'true';
+    
+        // Obtener el hotel con o sin habitaciones, según el parámetro
+        $query = Hotel::query();
+        if ($includeHabitaciones) {
+            $query->with('habitaciones');
+        }
+    
+        $hotel = $query->find($idHotel);
+    
         if (!$hotel) {
             throw new HotelNotFoundException($idHotel);
-            // return response()->json([
-            //     'message' => "El hotel con ID {$idHotel} no existe.",
-            // ], 404);
         }
-
+    
         return response()->json($hotel, 200);
     }
+    
 
 
     /**
@@ -178,12 +194,16 @@ class HotelController extends Controller
     public function update(PutRequest $request,  $idHotel)
     {
         $hotel = Hotel::find($idHotel);
+        
+
         if (!$hotel) {
             throw new HotelNotFoundException($idHotel);
         }
 
+        $data = $request->validated();
+
         $hotel->touch();
-        $hotel->update($request->validated());
+        $hotel->update($data);
         return response()->json($hotel);
     }
 

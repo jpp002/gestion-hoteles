@@ -25,13 +25,25 @@ class PutRequest extends FormRequest
     {
         $hotelId = $this->route('hotel');
 
-        return [
-            'nombre' => 'required|min:5|max:50',
-            'direccion' => 'required|min:5|max:100|unique:hoteles,direccion,' . $hotelId,
-            'telefono' => 'required|max:20|unique:hoteles,telefono,' . $hotelId,
-            'email' => 'required|min:5|unique:hoteles,email,' . $hotelId,
-            'sitioWeb' => 'required|min:5|unique:hoteles,sitioWeb,' . $hotelId,
-        ];
+        $method = $this->method();
+
+        if ($method == "PUT") {
+            return [
+                'nombre' => 'required|min:5|max:50',
+                'direccion' => 'required|min:5|max:100|unique:hoteles,direccion,' . $hotelId,
+                'telefono' => 'required|max:20|unique:hoteles,telefono,' . $hotelId,
+                'email' => 'required|email|unique:hoteles,email,' . $hotelId,
+                'sitioWeb' => 'required|min:5|unique:hoteles,sitioWeb,' . $hotelId,
+            ];
+        } else {
+            return [
+                'nombre' => 'sometimes|min:5|max:50',
+                'direccion' => 'sometimes|min:5|max:100|unique:hoteles,direccion,' . $hotelId,
+                'telefono' => 'sometimes|max:20|unique:hoteles,telefono,' . $hotelId,
+                'email' => 'sometimes|email|unique:hoteles,email,' . $hotelId,
+                'sitioWeb' => 'sometimes|min:5|unique:hoteles,sitioWeb,' . $hotelId,
+            ];
+        }
     }
 
 

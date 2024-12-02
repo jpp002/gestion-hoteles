@@ -133,6 +133,10 @@ class HabitacionController extends Controller
         return response()->json($habitacion, 201);
     }
 
+    public function bulk(){
+        
+    }
+
     /**
      * @OA\Get(
      *     path="/api/habitacion/{habitacion}",
