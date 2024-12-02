@@ -16,7 +16,7 @@ window.onload = function() {
     layout: "StandaloneLayout",
     requestInterceptor: (request) => {
       // Añadir encabezado X-CSRF-TOKEN vacío
-      request.headers['X-CSRF-TOKEN'] = '\'';
+      request.headers['X-CSRF-TOKEN'] = '';
       return request;
     }
   });
