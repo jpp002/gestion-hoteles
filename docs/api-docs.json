@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "https://gestion-hotel.test/"
+            "url": "http://gestion-hotel.test/"
         }
     ],
     "paths": {
