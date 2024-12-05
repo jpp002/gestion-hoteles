@@ -26,11 +26,21 @@ class PutRequest extends FormRequest
 
         $huespedId = $this->route('huesped');
 
-        return [
-            'nombre' => 'required|max:50',
-            'apellido' => 'required|max:50',
-            'dniPasaporte' => 'required|min:9|max:9|unique:huespedes,dniPasaporte' . $huespedId,
-        ];
+        $method = $this->method();
+
+        if ($method == "PUT") {
+            return [
+                'nombre' => 'required|max:50',
+                'apellido' => 'required|max:50',
+                'dniPasaporte' => 'required|min:9|max:9|unique:huespedes,dniPasaporte' . $huespedId,
+            ];
+        } else {
+            return [
+                'nombre' => 'sometimes|max:50',
+                'apellido' => 'sometimes|max:50',
+                'dniPasaporte' => 'sometimes|min:9|max:9|unique:huespedes,dniPasaporte' . $huespedId,
+            ];
+        }
     }
 
     public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)

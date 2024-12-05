@@ -155,7 +155,7 @@ class ServicioController extends Controller
         if (!$servicio) {
             throw new ServicioNotFoundException($idServicio);
         }
-        
+
 
 
         return response()->json($servicio, 200);

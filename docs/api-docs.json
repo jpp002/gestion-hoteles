@@ -319,6 +319,14 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "name": "includeHabitaciones",
+                        "in": "query",
+                        "description": "Inluye el numero de habitaciones",
+                        "schema": {
+                            "type": "boolean"
+                        }
                     }
                 ],
                 "responses": {
@@ -378,6 +386,22 @@
                         "required": true,
                         "schema": {
                             "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "includeHabitaciones",
+                        "in": "query",
+                        "description": "Inluye las habitaciones del hotel",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "includeServicios",
+                        "in": "query",
+                        "description": "Inluye los servicios del hotel",
+                        "schema": {
+                            "type": "boolean"
                         }
                     }
                 ],
@@ -444,6 +468,41 @@
                 "responses": {
                     "200": {
                         "description": "Hotel eliminado correctamente"
+                    },
+                    "404": {
+                        "description": "Hotel no encontrado"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Hotel"
+                ],
+                "summary": "Actualizar parcialmente un hotel",
+                "operationId": "f93244d5e381ffbb4c48bf5647a8db71",
+                "parameters": [
+                    {
+                        "name": "hotel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PutHotelRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Hotel actualizado correctamente"
                     },
                     "404": {
                         "description": "Hotel no encontrado"
@@ -563,6 +622,92 @@
                 "responses": {
                     "200": {
                         "description": "Lista de servicios"
+                    }
+                }
+            }
+        },
+        "/api/hotel/cascada": {
+            "post": {
+                "tags": [
+                    "Hotel"
+                ],
+                "summary": "Crear un hotel con habitaciones y servicios en cascada",
+                "operationId": "8516ce504100e23f259d2335a50bdd33",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Hotel Ejemplo"
+                                    },
+                                    "direccion": {
+                                        "type": "string",
+                                        "example": "Calle Falsa 123"
+                                    },
+                                    "telefono": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "hotel@ejemplo.com"
+                                    },
+                                    "sitioWeb": {
+                                        "type": "string",
+                                        "example": "http://hotel-ejemplo.com"
+                                    },
+                                    "habitaciones": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "numero": {
+                                                    "type": "string",
+                                                    "example": "101"
+                                                },
+                                                "tipo": {
+                                                    "type": "string",
+                                                    "example": "Deluxe"
+                                                },
+                                                "precioNoche": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 100.5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "servicios": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "nombre": {
+                                                    "type": "string",
+                                                    "example": "WiFi"
+                                                },
+                                                "descripcion": {
+                                                    "type": "string",
+                                                    "example": "Internet de alta velocidad"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Hotel creado con éxito junto con sus relaciones"
+                    },
+                    "400": {
+                        "description": "Error en los datos enviados"
                     }
                 }
             }
@@ -1086,6 +1231,66 @@
                     }
                 }
             }
+        },
+        "/api/user/login": {
+            "post": {
+                "tags": [
+                    "Usuario"
+                ],
+                "summary": "Iniciar sesión de usuario",
+                "description": "Permite a un usuario iniciar sesión con sus credenciales (email y contraseña). Si las credenciales son correctas, se devuelve un token de autenticación.",
+                "operationId": "e2f16b490348a902bb9994972e2d20af",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Correo electrónico del usuario",
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "description": "Contraseña del usuario",
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login exitoso, se devuelve el token de autenticación.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMjM0NTY3ODkwLCJpYXQiOjE1MTYyMzkwMjJ9.dXnp_wHjoOFlvOzx4f56zuwFOjwKBGjvv3wbFsQdSuM"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales incorrectas (usuario o contraseña inválidos)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Usuario y/o contraseña invalida"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1502,6 +1707,14 @@
                 },
                 "type": "object"
             }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
+            }
         }
     },
     "tags": [
@@ -1518,8 +1731,17 @@
             "description": "Operaciones relacionadas con los servicios"
         },
         {
+            "name": "Usuario",
+            "description": "Operaciones relacionadas con los usuarios"
+        },
+        {
             "name": "Hotel",
             "description": "Hotel"
+        }
+    ],
+    "security": [
+        {
+            "sanctum": []
         }
     ]
 }

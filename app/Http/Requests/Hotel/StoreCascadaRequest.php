@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
-class StoreRequest extends FormRequest
+class StoreCascadaRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,6 +29,13 @@ class StoreRequest extends FormRequest
             'telefono' => 'required|max:20|unique:hoteles',
             'email' => 'required|email|unique:hoteles',
             'sitioWeb' => 'required|url|unique:hoteles',
+            'habitaciones' => 'array',
+            'habitaciones.*.numero' => 'required|string|max:20',
+            'habitaciones.*.tipo' => 'required|string|max:50',
+            'habitaciones.*.precioNoche' => 'required|numeric|min:0',
+            'servicios' => 'array',
+            'servicios.*.nombre' => 'required|string|max:100',
+            'servicios.*.descripcion' => 'nullable|string|max:255',
         ];
     }
 

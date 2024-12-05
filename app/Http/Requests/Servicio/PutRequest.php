@@ -23,16 +23,26 @@ class PutRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'nombre' => 'required|min:3|max:50', 
-            'descripcion' => 'required|min:5|max:500',
-            'categoria' => 'required|min:5',
-        ];
+        $method = $this->method();
+
+        if ($method == "PUT") {
+            return [
+                'nombre' => 'required|min:3|max:50',
+                'descripcion' => 'required|min:5|max:500',
+                'categoria' => 'required|min:5',
+            ];
+        } else {
+            return [
+                'nombre' => 'sometimes|min:3|max:50',
+                'descripcion' => 'sometimes|min:5|max:500',
+                'categoria' => 'sometimes|min:5',
+            ];
+        }
     }
 
     public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
-        if($this->expectsJson()) {
+        if ($this->expectsJson()) {
             $response = new Response($validator->errors(), 400);
             throw new ValidationException($validator, $response);
         }

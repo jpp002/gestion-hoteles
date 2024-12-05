@@ -33,7 +33,7 @@ class PutRequest extends FormRequest
                 'direccion' => 'required|min:5|max:100|unique:hoteles,direccion,' . $hotelId,
                 'telefono' => 'required|max:20|unique:hoteles,telefono,' . $hotelId,
                 'email' => 'required|email|unique:hoteles,email,' . $hotelId,
-                'sitioWeb' => 'required|min:5|unique:hoteles,sitioWeb,' . $hotelId,
+                'sitioWeb' => 'required|url|unique:hoteles,sitioWeb,' . $hotelId,
             ];
         } else {
             return [
@@ -41,7 +41,7 @@ class PutRequest extends FormRequest
                 'direccion' => 'sometimes|min:5|max:100|unique:hoteles,direccion,' . $hotelId,
                 'telefono' => 'sometimes|max:20|unique:hoteles,telefono,' . $hotelId,
                 'email' => 'sometimes|email|unique:hoteles,email,' . $hotelId,
-                'sitioWeb' => 'sometimes|min:5|unique:hoteles,sitioWeb,' . $hotelId,
+                'sitioWeb' => 'sometimes|url|unique:hoteles,sitioWeb,' . $hotelId,
             ];
         }
     }

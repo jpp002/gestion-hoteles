@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\HabitacionNotFoundException;
 use App\Exceptions\HotelNotFoundException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Habitacion\BulkStoreRequest;
 use App\Http\Requests\Habitacion\PutRequest;
 use App\Http\Requests\Habitacion\StoreRequest;
 use App\Models\Habitacion;
 use App\Models\Hotel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 /**
  * @OA\Tag(name="Habitación", description="Operaciones relacionadas con las habitaciones")
@@ -133,9 +135,36 @@ class HabitacionController extends Controller
         return response()->json($habitacion, 201);
     }
 
-    public function bulk(){
-        
+    public function bulkStore(BulkStoreRequest $request)
+    {
+
+        // Se extraen los datos validados de las habitaciones
+        dd($request->all());  // Muestra los datos enviados en la solicitud
+
+        $habitacionesData = $request->validated()['habitaciones'];
+
+        // Crear las habitaciones en batch
+        foreach ($habitacionesData as $habitacionData) {
+            $hotel = Hotel::find($habitacionData['hotel_id']);
+
+            if (!$hotel) {
+                throw new HotelNotFoundException($habitacionData['hotel_id']);
+            }
+
+            $habitacion = new Habitacion($habitacionData);
+            $habitacion->timestamps = false; // Evita la actualización automática de timestamps
+            $habitacion->created_at = now(); // Establece created_at manualmente
+            $habitacion->updated_at = null; // No modificamos updated_at en creación
+            $habitacion->save();
+        }
+
+        return response()->json([
+            'message' => 'Habitaciones creadas correctamente',
+            'data' => $habitacionesData
+        ], 201);
     }
+
+
 
     /**
      * @OA\Get(
