@@ -174,6 +174,19 @@ class ServicioController extends Controller
      *     @OA\Response(response=200, description="Servicio actualizado correctamente"),
      *     @OA\Response(response=404, description="Servicio no encontrado")
      * )
+     * @OA\Patch(
+     *     path="/api/servicio/{id}",
+     *     summary="Actualizar un servicio",
+     *     tags={"Servicio"},
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID del servicio", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/PutServicioRequest")
+     *     ),
+     *     @OA\Response(response=200, description="Servicio actualizado correctamente"),
+     *     @OA\Response(response=404, description="Servicio no encontrado")
+     * )
+     *
      */
     public function update(PutRequest $request, $idServicio)
     {

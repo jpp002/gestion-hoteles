@@ -177,6 +177,20 @@ public function index(Request $request)
      *     @OA\Response(response=200, description="Huésped actualizado correctamente"),
      *     @OA\Response(response=404, description="Huésped no encontrado")
      * )
+     *
+     *
+     * @OA\Patch(
+     *     path="/api/huesped/{idHuesped}",
+     *     summary="Actualizar un huésped",
+     *     tags={"Huesped"},
+     *     @OA\Parameter(name="idHuesped", in="path", required=true, description="ID del huésped", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/PutHuespedRequest")
+     *     ),
+     *     @OA\Response(response=200, description="Huésped actualizado correctamente"),
+     *     @OA\Response(response=404, description="Huésped no encontrado")
+     * )
      */
     public function update(PutRequest $request, $idHuesped)
     {

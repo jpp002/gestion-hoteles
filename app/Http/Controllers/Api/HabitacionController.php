@@ -200,6 +200,20 @@ class HabitacionController extends Controller
      *     @OA\Response(response=200, description="Habitación actualizada correctamente"),
      *     @OA\Response(response=404, description="Habitación no encontrada")
      * )
+     *
+     *
+     * @OA\Patch(
+     *     path="/api/habitacion/{habitacion}",
+     *     summary="Actualizar parcial de una habitación",
+     *     tags={"Habitación"},
+     *     @OA\Parameter(name="habitacion", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/PutHabitacionRequest")
+     *     ),
+     *     @OA\Response(response=200, description="Habitación actualizada correctamente"),
+     *     @OA\Response(response=404, description="Habitación no encontrada")
+     * )
      */
     public function update(PutRequest $request, $idHabitacion)
     {

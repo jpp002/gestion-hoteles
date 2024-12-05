@@ -200,6 +200,41 @@
                         "description": "Habitación no encontrada"
                     }
                 }
+            },
+            "patch": {
+                "tags": [
+                    "Habitación"
+                ],
+                "summary": "Actualizar parcial de una habitación",
+                "operationId": "8e4d4b7951e9cf170b493a239e0b346f",
+                "parameters": [
+                    {
+                        "name": "habitacion",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PutHabitacionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Habitación actualizada correctamente"
+                    },
+                    "404": {
+                        "description": "Habitación no encontrada"
+                    }
+                }
             }
         },
         "/api/habitacion/{habitacion}/hotel": {
@@ -921,6 +956,42 @@
                         "description": "Huésped no encontrado"
                     }
                 }
+            },
+            "patch": {
+                "tags": [
+                    "Huesped"
+                ],
+                "summary": "Actualizar un huésped",
+                "operationId": "5db6797376559cd3fa35c8626e6b8476",
+                "parameters": [
+                    {
+                        "name": "idHuesped",
+                        "in": "path",
+                        "description": "ID del huésped",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PutHuespedRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Huésped actualizado correctamente"
+                    },
+                    "404": {
+                        "description": "Huésped no encontrado"
+                    }
+                }
             }
         },
         "/api/huesped/{idHuesped}/habitacion": {
@@ -1197,6 +1268,42 @@
                 "responses": {
                     "200": {
                         "description": "Servicio eliminado"
+                    },
+                    "404": {
+                        "description": "Servicio no encontrado"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Servicio"
+                ],
+                "summary": "Actualizar un servicio",
+                "operationId": "0ba8a96a8d0a1dbf78dd06887a9dd781",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del servicio",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PutServicioRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Servicio actualizado correctamente"
                     },
                     "404": {
                         "description": "Servicio no encontrado"
